@@ -1,0 +1,39 @@
+---
+- name: 'Ensure /data/apps exists'
+  become: yes
+  become_user: root
+  file:
+    path: '{{ item }}'
+    state: directory
+    mode: 0755
+  with_items:
+    - '/data'
+    - '/data/apps'
+
+- name: Download git repo.
+  become: yes
+  become_user: root
+  #command: 'git -c http.sslVerify=false clone -b {{ branch }} --single-branch https://{{ user }}:{{ pass }}@{{ git_link }}'
+  shell: 'git clone https://github.com/rea-cruitment/simple-sinatra-app.git'
+  args:
+    chdir: '/data/apps'
+
+- name: Install the app.
+  become: yes
+  become_user: root
+  command: 'bundle install'
+  args:
+    chdir: '/data/apps/simple-sinatra-app'
+
+
+- name: Run the app.
+  become: yes
+  become_user: root
+  shell: 'bundle exec rackup -p 80 --host {{ ipaddress }} &'
+  args:
+    chdir: '/data/apps/simple-sinatra-app'
+
+
+
+
+

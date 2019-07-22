@@ -1,0 +1,385 @@
+---
+# This is a linux and windows stack for reagroup test -sinatra app.
+# 
+# 
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Linux stack .
+Parameters:
+  keyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance.
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: It must be the name of an existing EC2 KeyPair.
+    Default: sinatra-key
+  AppName:
+    Type: String
+    Description: Application name.
+    Default: reagroupapp
+  baseAmiLinux:
+    Type: String
+    Default: ami-075caa3491def750b
+    Description: Base ami for all linux app.
+  baseAmiWindow:
+    Type: String
+    Default: ami-054959862cd084540
+    Description: Base ami for all linux app.
+  instanceSize:
+    Type: String
+    Default: t2.micro
+    Description: Size of ec2 instances
+  envCode:
+    Description: Which environment to deploy to?
+    Type: String
+    Default: NonProduction
+    AllowedValues:
+    - NonProduction
+    - End2End
+    - ProductionSupport
+    - Production
+  envSubCode:
+    Description: Which logical environment ?
+    Type: String
+    Default: dev
+    AllowedValues:
+    - st
+    - dev
+  scheduleName:
+    Type: String
+    Default: SydneyBusinessHours
+Mappings:
+  ENVIRONS:
+    NonProduction:
+      ABRV: np
+    Production:
+      ABRV: pr
+    End2End:
+      ABRV: ee
+    ProductionSupport:
+      ABRV: ps
+
+Resources:
+    ##########################
+   ####Linux server
+ 
+  AppRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "ec2.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies: 
+        - 
+          PolicyName: "AppPolicy"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action: 
+                  - s3:CreateBucket
+                  - s3:Get*
+                  - s3:List*
+                  - s3:PutBucketLogging
+                  - s3:PutBucketNotification
+                  - s3:PutBucketVersioning
+                  - s3:PutObject
+                  - s3:PutObjectVersionAcl
+                  - s3:RestoreObject
+                Resource: 
+                  - arn:aws:s3:::*
+  Ec2InstanceProfile: 
+    Type: "AWS::IAM::InstanceProfile"
+    Properties: 
+      Path: "/"
+      Roles: 
+        - 
+          Ref: "AppRole"
+  EncryptedVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+      AvailabilityZone: ap-southeast-2a
+      Size: 10
+      VolumeType: gp2
+      Encrypted: true
+      ##Provide your kmskeyId here
+      KmsKeyId: arn:aws:kms:ap-southeast-2:929562907700:key/3b6448a4-3ec7-4bac-8ef5-57d79b3d82de
+      Tags: 
+        - Key:    Name
+          Value:  !Join ['-', [ !Ref 'AppName', vol]]
+        - Key: env:code
+          Value: !FindInMap [ENVIRONS, !Ref 'envCode', ABRV]
+        - Key: state:scheduleName
+          Value: !Ref scheduleName
+        - Key: applicationName
+          Value: !Ref 'AppName'
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:      !Ref baseAmiLinux
+      InstanceType: !Ref instanceSize
+      SubnetId:     !ImportValue privsubnet
+      KeyName:      !Ref keyName
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      SecurityGroupIds: 
+        - !GetAtt Ec2InstanceSG.GroupId
+      Tags:
+        - Key:    Name
+          Value:  !Join ['-', [ Private, !Ref 'AppName']]
+        - Key: env:code
+          Value: !FindInMap [ENVIRONS, !Ref 'envCode', ABRV]
+        - Key: state:scheduleName
+          Value: !Ref scheduleName
+        - Key: applicationName
+          Value: !Ref 'AppName'
+  EC2Instanceprivateb:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:      !Ref baseAmiLinux
+      InstanceType: !Ref instanceSize
+      SubnetId:     !ImportValue privsubnetb
+      KeyName:      !Ref keyName
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      SecurityGroupIds: 
+        - !GetAtt Ec2InstanceSG.GroupId
+      Tags:
+        - Key:    Name
+          Value:  !Join ['-', [ Private, !Ref 'AppName']]
+        - Key: env:code
+          Value: !FindInMap [ENVIRONS, !Ref 'envCode', ABRV]
+        - Key: state:scheduleName
+          Value: !Ref scheduleName
+        - Key: applicationName
+          Value: !Ref 'AppName'
+  EC2Instanceprivatec:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:      !Ref baseAmiLinux
+      InstanceType: !Ref instanceSize
+      SubnetId:     !ImportValue privsubnetc
+      KeyName:      !Ref keyName
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      SecurityGroupIds: 
+        - !GetAtt Ec2InstanceSG.GroupId
+      Tags:
+        - Key:    Name
+          Value:  !Join ['-', [ Private, !Ref 'AppName']]
+        - Key: env:code
+          Value: !FindInMap [ENVIRONS, !Ref 'envCode', ABRV]
+        - Key: state:scheduleName
+          Value: !Ref scheduleName
+        - Key: applicationName
+          Value: !Ref 'AppName'
+
+  PubEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:      !Ref baseAmiLinux
+      InstanceType: !Ref instanceSize
+      SubnetId:     !ImportValue pubsubnet
+      KeyName:      !Ref keyName
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      SecurityGroupIds: 
+        - !GetAtt PubEc2InstanceSG.GroupId
+      Tags:
+        - Key:    Name
+          Value:  !Join ['-', [ Public, !Ref 'AppName']]
+        - Key: env:code
+          Value: !FindInMap [ENVIRONS, !Ref 'envCode', ABRV]
+        - Key: state:scheduleName
+          Value: !Ref scheduleName
+        - Key: applicationName
+          Value: !Ref 'AppName'
+  PubEC2Instanceb:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:      !Ref baseAmiWindow
+      InstanceType: !Ref instanceSize
+      SubnetId:     !ImportValue pubsubnetb
+      KeyName:      !Ref keyName
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      SecurityGroupIds: 
+        - !GetAtt PubEc2InstanceSG.GroupId
+      Tags:
+        - Key:    Name
+          Value:  !Join ['-', [ Public, !Ref 'AppName']]
+        - Key: env:code
+          Value: !FindInMap [ENVIRONS, !Ref 'envCode', ABRV]
+        - Key: state:scheduleName
+          Value: !Ref scheduleName
+        - Key: applicationName
+          Value: !Ref 'AppName'
+
+  DNS: 
+   Type: "AWS::Route53::HostedZone"
+   Properties: 
+     HostedZoneConfig: 
+       Comment: "Hosted zone for app"
+     Name: "reagroup.com"
+     VPCs: 
+       - 
+         VPCId: !ImportValue customvpc
+         VPCRegion: "ap-southeast-2"
+
+  EC2VolAttachment:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      Device: /dev/xvdh
+      InstanceId: !Ref EC2Instance
+      VolumeId: !Ref EncryptedVolume
+
+  R53RecordSet1:
+   Type: AWS::Route53::RecordSet
+   Properties:
+     Name: web1.reagroup.com
+     HostedZoneId: !Ref DNS
+     Type: A
+     TTL: 300
+     ResourceRecords:
+       - !GetAtt EC2Instance.PrivateIp
+  R53RecordSet2:
+   Type: AWS::Route53::RecordSet
+   Properties:
+     Name: web2.reagroup.com
+     HostedZoneId: !Ref DNS
+     Type: A
+     TTL: 300
+     ResourceRecords:
+       - !GetAtt EC2Instanceprivateb.PrivateIp
+  R53RecordSet3:
+   Type: AWS::Route53::RecordSet
+   Properties:
+     Name: web3.reagroup.com
+     HostedZoneId: !Ref DNS
+     Type: A
+     TTL: 300
+     ResourceRecords:
+       - !GetAtt EC2Instanceprivatec.PrivateIp
+    
+  Ec2InstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      VpcId: !ImportValue customvpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 10.0.0.0/8
+      - IpProtocol: tcp
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: 10.0.0.0/8
+      - IpProtocol: tcp
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 10.0.0.0/8
+      Tags:
+        - Key:    Name
+          Value:  !Join ['-', [ Private, App, sg]]
+        - Key: env:code
+          Value: !FindInMap [ENVIRONS, !Ref 'envCode', ABRV]
+        - Key: state:scheduleName
+          Value: !Ref scheduleName
+        - Key: applicationName
+          Value: !Ref 'AppName'
+  PubEc2InstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      VpcId: !ImportValue customvpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '3389'
+        ToPort: '3389'
+        CidrIp: 0.0.0.0/0
+
+  AppElb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      Subnets:
+        - !ImportValue pubsubnet
+        - !ImportValue pubsubnetb
+        - !ImportValue pubsubnetc
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: '300'
+      SecurityGroups:
+        - !GetAtt ElbSecurityGroup.GroupId
+
+  ElbTTPSListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref AppTargetGroup
+      LoadBalancerArn: !Ref AppElb
+      Port: 80
+      Protocol: HTTP
+
+  ElbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 Security Group for elb
+      VpcId: !ImportValue 'customvpc'
+      Tags:
+      - Key: Name
+        Value: !Join ['-', [ !Ref 'AppName', elbsg]]
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 10.0.0.0/16
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.0.0.0/16
+
+  AppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 80
+      Protocol: HTTP
+      Targets:
+        - Id: !Ref EC2Instanceprivateb
+          Port: 80
+        - Id: !Ref EC2Instanceprivatec
+          Port: 80
+        - Id: !Ref EC2Instance
+          Port: 80
+      TargetType: instance
+      VpcId: !ImportValue 'customvpc'
+
+Outputs:
+  EC2Instance:
+    Description:  EC2 Instance Id
+    Value:        !Ref EC2Instance
+  EC2InstanceIp:
+    Description:  EC2 Instance IP Address
+    Value:        !GetAtt EC2Instance.PrivateIp
+  EC2InstanceprivatebIp:
+    Description:  EC2 Instance IP Address
+    Value:        !GetAtt EC2Instanceprivateb.PrivateIp
+  EC2InstanceprivatecIp:
+    Description:  EC2 Instance IP Address
+    Value:        !GetAtt EC2Instanceprivatec.PrivateIp
+  PubEC2InstanceIp:
+    Description:  EC2 Instance IP Address
+    Value:        !GetAtt PubEC2Instance.PublicIp
+  PubEC2InstancebIp:
+    Description:  EC2 Instance IP Address
+    Value:        !GetAtt PubEC2Instanceb.PublicIp

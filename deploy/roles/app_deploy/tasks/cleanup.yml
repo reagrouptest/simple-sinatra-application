@@ -1,0 +1,14 @@
+---
+- name: Remove /data/apps directory.
+  become: yes
+  become_user: root
+  file:
+    path: /data/apps
+    state: absent
+
+- name: Remove backup directory.
+  become: yes
+  become_user: root
+  file:
+    path: /backup
+    state: absent

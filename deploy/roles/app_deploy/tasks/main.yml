@@ -1,0 +1,5 @@
+---
+- include: backup.yml
+- include: cleanup.yml
+- include: prereq.yml
+- include: deploy.yml

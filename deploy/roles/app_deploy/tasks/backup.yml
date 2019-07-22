@@ -1,0 +1,8 @@
+---
+- name: Backup the application files.
+  become: yes
+  become_user: root
+  copy:
+    src: "/data/apps/"
+    dest: "/backup"
+  when: backuprequired

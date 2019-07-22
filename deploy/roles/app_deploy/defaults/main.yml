@@ -1,0 +1,4 @@
+---
+backuprequired: false
+PortToCheck: '80'
+ipaddress: hostvars[inventory_hostname]['ansible_enp0s3']['ipv4']['address']

@@ -1,0 +1,48 @@
+---
+- name: Create backup directory.
+  become: yes
+  become_user: root
+  file:
+    path: '/backup/'
+    state: directory
+
+- name: Install requirements for ruby installation.
+  become: yes
+  become_user: root
+  command: 'yum install gcc-c++ patch readline readline-devel zlib zlib-devel \
+   libyaml-devel libffi-devel openssl-devel make \
+   bzip2 autoconf automake libtool bison iconv-devel sqlite-devel'
+  args:
+    warn: false
+
+- name: Install GPG keys.
+  become: yes
+  become_user: root
+  command: 'gpg2 --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB'
+
+- name: Install ruby version manager.
+  become: yes
+  become_user: root
+  shell: 'curl -L get.rvm.io | bash -s stable'
+  args:
+    warn: false
+
+- name: Enbale rvm use.
+  become: yes
+  become_user: root
+  shell: 'source /etc/profile.d/rvm.sh'
+
+- name: Install ruby.
+  become: yes
+  become_user: root
+  command: 'rvm install 2.3'
+
+- name: Install git.
+  become: yes
+  become_user: root
+  command: 'yum install git'
+
+- name: Install bundler.
+  become: yes
+  become_user: root
+  command: 'gem install bundler'

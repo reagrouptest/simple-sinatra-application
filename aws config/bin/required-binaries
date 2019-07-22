@@ -1,0 +1,64 @@
+#!/bin/bash -xe
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+NC='\033[0m'
+
+if [ ! -d "${HOME}/aws_infra/binaries/virtualenv" ]; then
+  echo "No virtualenv found..\nCreating now...\n"
+
+which virtualenv
+VIRTUALENVEXISTS=$?
+echo ${VIRTUALENVEXISTS}
+
+      if [[ ${VIRTUALENVEXISTS} == '0' ]]; then
+        echo "Virtualenv binary doesn't exist..\n"
+      else
+        pip install virtualenv
+      fi
+
+      echo "Virtualenv should be installed now..\n"
+      echo "Create a virtualenv..\n"
+      virtualenv "${HOME}/aws_infra/binaries/virtualenv"
+      VIRTUALENVEXIT=$?
+
+        if [[ ${VIRTUALENVEXIT} != '0' ]]; then
+          echo "\nVirtualenv is not installed properly"
+          return ${VIRTUALENVEXISTS}
+        fi
+
+fi
+      echo "\nSourcing the new virtualenv.."
+      source "${HOME}/aws_infra/binaries/virtualenv/bin/activate"
+      SOURCEVIRTUAL=$?
+      if [[ ${SOURCEVIRTUAL} != '0' ]]; then
+        echo "\nSource virtualenv failed..\n"
+        exit ${SOURCEVIRTUAL}
+      fi
+
+      echo "\nInstall required Python modules.."
+      pip install -r "${HOME}/aws_infra/binaries/requirements.txt"
+      PIPINSTALL=$?
+      if [[ ${PIPINSTALL} != '0' ]]; then
+        echo "\nPip install failed..\n"
+        exit ${PIPINSTALL}
+      fi
+
+echo "${GREEN}Download saml2aws:\n"
+echo "\nFind out if Linux/Mac\n"
+echo "Download only specific version of saml2aws${NC}"
+
+arch=$(uname -a | awk '{print $1}')
+if [[ ! -f "${HOME}/aws_infra/binaries/saml2aws" ]]; then
+  echo "${GREEN}\nSAML2AWS file doesn't exist${NC}"
+  echo ${arch}
+  if [[ ${arch} == 'Linux' ]]; then
+    echo "linux"
+    curl -k repolink -O
+  elif [[ ${arch} == 'Darwin' ]]; then
+    echo "darwin"
+    curl -k repolink -O
+  fi
+    echo "\nEnsuring permissions"
+    mv saml2aws "${HOME}/aws_infra/binaries/saml2aws"; chmod +x "${HOME}/aws_infra/binaries/saml2aws"
+fi

@@ -1,0 +1,42 @@
+#!/bin/bash -xe
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+NC='\033[0m'
+ACC_AWS='438277310103'
+[[ $_ != $0 ]] && echo "Script is being sourced" || echo "Script is a subshell"
+
+AWS_ACC=$1
+if [[ -z ${SAML2AWS_USERNAME} ]]; then
+  echo "\nSAML2AWS_USERNAME is not set"
+  echo "\nSet as:\nexport SAML2AWS_USERNAME='<username>'"
+  return 5
+fi
+
+function login() {
+  export SAML2AWS_USERNAME=${SAML2AWS_USERNAME}
+  export SAML2AWS_PASSWORD=${SAML2AWS_PASSWORD}
+  export AWS_DEFAULT_REGION='ap-southeast-2' # sydney
+  # export creds to non-default file
+  export AWS_SHARED_CREDENTIALS_FILE="$HOME/aws_saml_${AWS_ACC}_credentials"
+
+  # log in
+  "$HOME/aws_infra/binaries/saml2aws" login --account ${AWS_ACC}
+
+  # rewrite the profile name to be the default profile
+  sed -ir "s/\\[saml\\]/\\[default\\]/g" $AWS_SHARED_CREDENTIALS_FILE
+}
+
+if [[ -z ${AWS_SHARED_CREDENTIALS_FILE} ]]; then
+  echo "\n\nEnv variable: AWS_SHARED_CREDENTIALS_FILE not set"
+  echo "Our scripts are based on this being set\nExitting.."
+  echo ${AWS_SHARED_CREDENTIALS_FILE}
+  return 5
+
+else
+  echo "\nAWS_SHARED_CREDENTIALS_FILE env var set"
+
+  echo "\nPlease check this is the correct role\n\nCurrently logged on as:\n"
+  aws sts get-caller-identity --output table
+
+fi
