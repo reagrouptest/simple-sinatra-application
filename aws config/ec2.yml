@@ -18,7 +18,7 @@ Parameters:
     Default: reagroupapp
   baseAmiLinux:
     Type: String
-    Default: ami-075caa3491def750b
+    Default: ami-0dc96254d5535925f
     Description: Base ami for all linux app.
   baseAmiWindow:
     Type: String
