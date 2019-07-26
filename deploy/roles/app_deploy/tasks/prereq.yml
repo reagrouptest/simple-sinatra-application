@@ -40,7 +40,12 @@
   become_user: root
   shell: 'yum -y install git'
 
+- name: install rdoc
+  become: yes
+  become_user: root
+  shell: 'gem install rdoc --no-document'
+
 - name: Install bundler.
   become: yes
   become_user: root
-  command: 'gem install bundler'
+  shell: 'gem install bundler'

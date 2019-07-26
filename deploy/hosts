@@ -1,4 +1,4 @@
 [app_deploy]
-web1.reagroup.com ansible_port=22 ansible_user=ec2-user ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys
-web2.reagroup.com ansible_port=22 ansible_user=ec2-user ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys
-web3.reagroup.com ansible_port=22 ansible_user=ec2-user ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys
+web1.reagroup.com ipaddress=web1.reagroup.com ansible_port=22 ansible_user=ec2-user ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys
+web2.reagroup.com ipaddress=web2.reagroup.com ansible_port=22 ansible_user=ec2-user ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys
+web3.reagroup.com ipaddress=web3.reagroup.com ansible_port=22 ansible_user=ec2-user ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys

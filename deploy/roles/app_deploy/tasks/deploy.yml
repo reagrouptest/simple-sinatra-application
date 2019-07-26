@@ -5,7 +5,7 @@
   file:
     path: '{{ item }}'
     state: directory
-    mode: 0755
+    mode: 0777
   with_items:
     - '/data'
     - '/data/apps'
@@ -18,10 +18,21 @@
   args:
     chdir: '/data/apps'
 
-- name: Install the app.
+- name: 'Give permission to git directories'
   become: yes
   become_user: root
-  command: 'bundle install'
+  file:
+    path: '/data/apps'
+    state: directory
+    mode: 0777
+    recurse: yes
+
+- name: Install the app.
+  become: yes
+  become_user: ec2-user
+  shell: 'bundle install'
+  environment:
+    PATH: /usr/local/bin/bundle:{{ ansible_env.PATH }}
   args:
     chdir: '/data/apps/simple-sinatra-app'
 
@@ -29,11 +40,7 @@
 - name: Run the app.
   become: yes
   become_user: root
-  shell: 'bundle exec rackup -p 80 --host {{ ipaddress }} &'
+  shell: 'nohup bundle exec rackup -p 80 --host {{ ipaddress }} </dev/null >/dev/null 2>&1 &'
   args:
     chdir: '/data/apps/simple-sinatra-app'
-
-
-
-
-
+    executable: /bin/bash
