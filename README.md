@@ -97,6 +97,7 @@ Steps:
    
 2. Install ansible and git as below
   ```
+  sudo yum install python-pip
   sudo pip install ansible
   sudo yum install git
 
@@ -105,8 +106,9 @@ Steps:
 3. Clone the git repo for application deployment through ansible.
 
   ```
-   sudo mkdir git
-   cd git
+   sudo mkdir /git
+   cd /git
+   sudo chmod 777 /git
    sudo git clone https://github.com/reagrouptest/simple-sinatra-application.git
 
    ```
@@ -119,9 +121,6 @@ Steps:
 
  ```
   
-5. To test the application. You can hit the load balancer which was created through ec2.yml stack.
-
-
 You can follow above method to deploy your application. Though the preferred way of doing is through CI-CD tools like Jenkins etc.
 
 
