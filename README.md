@@ -97,9 +97,9 @@ Steps:
    
 2. Install ansible and git as below
   ```
-  sudo yum install python-pip
+  sudo yum -y install python-pip
   sudo pip install ansible
-  sudo yum install git
+  sudo yum -y install git
 
   ```
 
