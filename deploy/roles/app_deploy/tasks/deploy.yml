@@ -29,7 +29,8 @@
 
 - name: Install the app.
   become: yes
-  become_user: ec2-user
+  become_user: root
+  ignore_errors: yes
   shell: 'bundle install'
   environment:
     PATH: /usr/local/bin/bundle:{{ ansible_env.PATH }}
@@ -44,3 +45,5 @@
   args:
     chdir: '/data/apps/simple-sinatra-app'
     executable: /bin/bash
+  environment:
+    PATH: /usr/local/bin/bundle:{{ ansible_env.PATH }} 

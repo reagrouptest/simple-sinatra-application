@@ -2,5 +2,8 @@
 
 - hosts: app_deploy
   gather_facts: true
+  pre_tasks:
+    - include_vars:
+        dir: 'group_vars'
   roles:
     - app_deploy

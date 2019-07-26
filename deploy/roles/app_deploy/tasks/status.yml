@@ -1,0 +1,11 @@
+- name: "Check the app status"
+  become: yes
+  become_user: root
+  shell:  "curl http://{{ ipaddress }}:80"
+  register: curl_output
+  args:
+   warn: false
+
+- debug:
+    msg: "{{ curl_output }}"
+
