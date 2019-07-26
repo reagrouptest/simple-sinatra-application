@@ -9,9 +9,7 @@
 - name: Install requirements for ruby installation.
   become: yes
   become_user: root
-  command: 'yum install gcc-c++ patch readline readline-devel zlib zlib-devel \
-   libyaml-devel libffi-devel openssl-devel make \
-   bzip2 autoconf automake libtool bison iconv-devel sqlite-devel'
+  shell: 'yum -y install gcc'
   args:
     warn: false
 
@@ -35,12 +33,12 @@
 - name: Install ruby.
   become: yes
   become_user: root
-  command: 'rvm install 2.3'
+  shell: 'amazon-linux-extras install ruby2.4'
 
 - name: Install git.
   become: yes
   become_user: root
-  command: 'yum install git'
+  shell: 'yum -y install git'
 
 - name: Install bundler.
   become: yes
