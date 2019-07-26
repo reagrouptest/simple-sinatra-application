@@ -3,3 +3,4 @@
 - include: cleanup.yml
 - include: prereq.yml
 - include: deploy.yml
+- include: status.yml

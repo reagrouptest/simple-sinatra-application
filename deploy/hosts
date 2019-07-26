@@ -1,4 +1,4 @@
 [app_deploy]
-web1.reagroup.com ipaddress=web1.reagroup.com ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys
-web2.reagroup.com ipaddress=web2.reagroup.com ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys
-web3.reagroup.com ipaddress=web3.reagroup.com ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys
+web1.reagroup.com ipaddress=web1.reagroup.com ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
+web2.reagroup.com ipaddress=web2.reagroup.com ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
+web3.reagroup.com ipaddress=web3.reagroup.com ansible_ssh_private_key_file=/home/ec2-user/.ssh/authorized_keys ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
