@@ -31,12 +31,13 @@
 - name: Install the app.
   become: yes
   become_user: root
-  ignore_errors: yes
+  ignore_errors: no
   shell: 'bundle install'
   environment:
     PATH: /usr/local/bin/bundle:{{ ansible_env.PATH }}
   args:
     chdir: '/data/apps/simple-sinatra-app'
+    executable: /bin/bash
 
 
 - name: Run the app.
