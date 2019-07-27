@@ -14,11 +14,17 @@
     state: absent
 
 - name: List any existing session of sinatra.
+  become: yes
+  become_user: root
   shell: "ps -ef | grep -v grep | grep -w rackup | awk '{print $2}'"
   register: process_id
   ignore_errors: yes
 
 - name: Kill the session.
+  become: yes
+  become_user: root
   shell: "kill -9 {{ item }}"
   with_items: "{{ process_id.stdout_lines }}"
   ignore_errors: yes
+  args:
+   executable: /bin/bash
