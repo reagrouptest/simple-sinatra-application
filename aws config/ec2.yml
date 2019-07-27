@@ -284,6 +284,16 @@ Resources:
      TTL: 300
      ResourceRecords:
        - !GetAtt EC2Instanceprivatec.PrivateIp
+  
+  R53RecordSet4:
+   Type: AWS::Route53::RecordSet
+   Properties:
+     Name: jenkinsnode.reagroup.com
+     HostedZoneId: !Ref DNS
+     Type: A
+     TTL: 300
+     ResourceRecords:
+       - !GetAtt EC2Instanceprivatejenkinsc.PrivateIp
     
   Ec2InstanceSG:
     Type: AWS::EC2::SecurityGroup

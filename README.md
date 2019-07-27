@@ -103,7 +103,7 @@ Steps:
 
   ```
 
-3. Clone the git repo for application deployment through ansible.
+3. Clone the git repo for application deployment.
 
   ```
    sudo mkdir /git

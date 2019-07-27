@@ -1,6 +1,6 @@
 ---
 
-- hosts: app_deploy
+- hosts: "{{ lookup('env', 'target_env') }}"
   gather_facts: true
   pre_tasks:
     - include_vars:
