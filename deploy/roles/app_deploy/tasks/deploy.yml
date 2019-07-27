@@ -36,7 +36,8 @@
   environment:
     PATH: /usr/local/bin/bundle:{{ ansible_env.PATH }}
   args:
-    chdir: '/data/apps/simple-sinatra-app'
+    #chdir: '/data/apps/simple-sinatra-app'
+    chdir: '/data/apps/app-code/simple-sinatra-app'
     executable: /bin/bash
 
 
@@ -45,7 +46,8 @@
   become_user: root
   shell: 'nohup bundle exec rackup -p 80 --host {{ ipaddress }} </dev/null >/dev/null 2>&1 &'
   args:
-    chdir: '/data/apps/simple-sinatra-app'
+    #chdir: '/data/apps/simple-sinatra-app'
+    chdir: '/data/apps/app-code/simple-sinatra-app'
     executable: /bin/bash
   environment:
     PATH: /usr/local/bin/bundle:{{ ansible_env.PATH }} 
