@@ -180,6 +180,26 @@ Resources:
         - Key: applicationName
           Value: !Ref 'AppName'
 
+  EC2Instanceprivatejenkinsc:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:      !Ref baseAmiLinux
+      InstanceType: t2.nano
+      SubnetId:     !ImportValue privsubnetc
+      KeyName:      !Ref keyName
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      SecurityGroupIds: 
+        - !GetAtt Ec2InstanceSG.GroupId
+      Tags:
+        - Key:    Name
+          Value:  !Join ['-', [ Private, 'jenkinsnode']]
+        - Key: env:code
+          Value: !FindInMap [ENVIRONS, !Ref 'envCode', ABRV]
+        - Key: state:scheduleName
+          Value: !Ref scheduleName
+        - Key: applicationName
+          Value: !Ref 'AppName'
+
   PubEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
