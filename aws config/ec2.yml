@@ -364,6 +364,16 @@ Resources:
       TargetType: instance
       VpcId: !ImportValue 'customvpc'
 
+  ElbR53RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: www.sinatra.reagroup.com
+      HostedZoneId: !Ref DNS
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt AppElb.CanonicalHostedZoneID
+        DNSName: !GetAtt AppElb.DNSName
+
 Outputs:
   EC2Instance:
     Description:  EC2 Instance Id
