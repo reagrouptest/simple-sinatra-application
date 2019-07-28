@@ -119,7 +119,7 @@ Steps:
 
   ```
   sudo yum update -y
-  sudo yum install java
+  sudo yum -y install java
   sudo yum -y install python-pip
   sudo pip install ansible
   sudo wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins.io/redhat/jenkins.repo
@@ -141,6 +141,7 @@ Steps:
    
    sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080
    sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 8443
+   sudo su -
    sudo iptables-save > /etc/sysconfig/iptables
    
    ```
@@ -149,17 +150,27 @@ Steps:
 
    The installation script directs you to the Customize Jenkins page. Go to Manage Jenkins--> Manage plugins --> Available--> install and select plugins- ssh, github, ssh agent, github integration and then restart the jenkins.
 
-
+   Create your first admin jenkins user.
+   
    ##### Configure jenkins node:
 
    SSH to 'Private-jenkinsnode' from your current public Linux box and install dependencies for node to work with master.
 
    ```
-   ssh ec2-user@jenkinsnode.reagroup.com -i /home/ec2-user/authorized_keys
+   ssh ec2-user@jenkinsnode.reagroup.com -i /home/ec2-user/.ssh/authorized_keys
    sudo yum -y install java
    sudo yum -y install python-pip
    sudo pip install ansible
    sudo yum -y install git
+   
+   ```
+
+   Update the authorized_keys file with the content of sinatra-key.pem  for ansible to interact with sinatra web servers.
+
+   ```
+   cd /home/ec2-user/.ssh
+   vi authorized_keys
+
    ```
 
    Login to jenkins master using - http://'public ip address of linux host' and configure node as below-
@@ -306,7 +317,7 @@ AZ C
 
 # Design decision for application.
 
-The application is designed in three availability zone to provide high availability in Australia region. The traffic is served using load balancer which listens on port 80.
+The application is designed in three availability zone with three servers to provide high availability in Australia region. The traffic is served using load balancer which listens on port 80.
 
 The application uses route53 entry as hostname in ansible playbook. This setup requires less maintenance whenever the IP address of instance changes.
 
