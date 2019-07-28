@@ -243,7 +243,7 @@ Steps:
     This will trigger the automated job build via jenkins.
 
 
-    Your application is ready to serve customer.
+    Your application is ready to serve customer. You can view the output using load balancer DNS name which was created using ec2.yml file.
 
     Happy coding!
 
