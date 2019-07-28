@@ -6,7 +6,10 @@ The aim of this repository is to house sinatra application to server on port 80.
 
 This project has been designed such that it does not require system engineer support for application change deployment. Whenever a developer pushes the code to application repository, jenkins automatically build the server and your load balancer serves the updated output.
 
-# Watch the application deployment:
+## Watch the application deployment:
+
+The deployment starts just with the Github push in the application code.
+
 
 [![Watch the deployment](images/watchdeployment.JPG)](https://drive.google.com/file/d/1qgdAEfIBvgLOu5dxWaGbqESkAdsD1D62/view)
 
@@ -212,7 +215,7 @@ Steps:
 
 
 
-    You might not be able to perform above step unless you have github access. This step is for information only.
+    You will be not able to perform above step unless you have github access. This step is for information only.
 
 
   5. Push the changes to the [Application code repository](https://github.com/reagrouptest/app-code.git)
