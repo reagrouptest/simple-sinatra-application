@@ -26,7 +26,10 @@ This project has been designed such that it does not require system engineer sup
 
 ## Assumptions
 
-A project should be designed to avoid a single point of failure. There are few known practices which can be implemented to make it more secure and highly available.
+Assumption is made that the application is used only for development purpose. Production application should be built on HTTPS and communications between host should be secure. 
+
+There are few known practices which can be implemented to make it more secure and highly available. 
+There should not be single point of failure.
 
 * This architecture should be used only for development purpose as it serves HTTP request.
   Recommendation is to use HTTPS for security reason.
@@ -38,13 +41,13 @@ A project should be designed to avoid a single point of failure. There are few k
 * Master branch is used for application deployment.
 * Jenkins server is designed on single host. It is recommended to create the jenkins 
   using high availability design.
-* Always ensure traffic in flight and data at rest is always encrypted in cloud.
+* Always ensure traffic in flight and data at rest is encrypted in cloud.
 
 
 
 ## Steps for AWS environment creation.
 
-Please download the  [Infrastructure as code ](https://github.com/reagrouptest/simple-sinatra-application.git) git repo and follow below instruction. This repository has vpc.yml and ec2.yml files which will be used for AWS network and application infrastructure build.
+Please download the  [Infrastructure as code ](https://github.com/reagrouptest/simple-sinatra-application.git) github repo and follow below instruction. This repository has vpc.yml and ec2.yml files which will be used for AWS network and application infrastructure build.
 
 1. Create network in AWS.
 2. Create application infrastructure in AWS.
@@ -53,7 +56,8 @@ Please download the  [Infrastructure as code ](https://github.com/reagrouptest/s
 
 1. Login to AWS console.
  [aws login](https://aws.amazon.com/console/)
-2. Look for AWS service- cloud formation. Go to the service and select 'create stack'. To create stack you can upload the file to S3 or use your local machine to upload the file. In this case you can use your local machine to 'upload a template file' called vpc.yml which was downloaded from git repository. This will build your network in AWS. Follow below process flow-
+2. Look for AWS service- cloud formation. Go to the service and select 'create stack'. To create stack you can upload the file to S3 or use your local machine to upload the file. In this case you can use your local machine to 'upload a template file' called vpc.yml which was downloaded from git repository. This will build your network in AWS. Follow below:
+
 Process flow-
 AWS service-->cloudformation-->create stack-->upload a template file-->choose file-->stack name
 
@@ -63,9 +67,11 @@ AWS service-->cloudformation-->create stack-->upload a template file-->choose fi
 ### Create application infrastructure in AWS.
 
 1. Go to AWS service ec2 and create your key pairs with the name 'sinatra-key'. Once you have created the key-pair it will be downloaded to your local which you can use to login to the application server.
+
 Process flow-
 AWS service-->ec2-->key pairs-->create key pair.
 2. Create KMS key to encrypt the ec2 volume by following below process.
+
 Process flow-
 AWS service-->customer managed keys-->create alias(sinatrakmskey)-->key administrators(cloudformationrole)-->key usage permission(cloudformationrole)-->finish
 
@@ -77,6 +83,7 @@ Once the kms key is completed. You will need to update the ec2.yml code block wi
 ```      
 3. Create application stack including all resources using ec2.yml file.
 Process-
+
 AWS service-->cloudformation-->create stack-->upload a template file(ec2.yml)-->choose file-->stack name-->mark tick to acknowledge IAM creation
 
 
@@ -136,9 +143,9 @@ Steps:
    The installation script directs you to the Customize Jenkins page. Go to Manage Jenkins--> Manage plugins --> Available--> install and select plugins- ssh, github, ssh agent, github integration and then restart the jenkins.
 
 
-   ######Configure jenkins node:
+   ##### Configure jenkins node:
 
-   Ssh to 'Private-jenkinsnode' from your current public Linux box and install dependencies for node to work with master.
+   SSH to 'Private-jenkinsnode' from your current public Linux box and install dependencies for node to work with master.
 
    ```
    ssh ec2-user@jenkinsnode.reagroup.com -i /home/ec2-user/authorized_keys
@@ -155,12 +162,12 @@ Steps:
     set Remote home directory=/home/ec2-user
         Launch method = Launch agent agents via SSH.
         Host= jenkinsnode.reagroup.com
-        Credentials = ' update your sinatra_key.pem file content to jenkins credentials manager with                 the user ec2-user username'
+        Credentials = ' update your sinatra_key.pem file content to jenkins credentials manager with the username ec2-user.'
         Connecton timeout in seconds= 60
         Remote work directory=/home/ec2-user
 
 
-   ###### Configure sinatra-app job
+   ##### Configure sinatra-app job
 
    Go to Jenkins dashboard-->New item--->enter item name('sinatra-app), select 'freestyle project'-->
    configure the job as below-
@@ -175,8 +182,24 @@ Steps:
 
    ![](images/jenkinsjobe.JPG)
 
-   
+ 
+   ```
+    pwd
+    ls -lart
+    sudo git clone https://github.com/reagrouptest/simple-sinatra-application.git
+
+    echo " this is the logged directory"
+    echo "Log in successful"
+    export target_env=$target_env
+    cd simple-sinatra-application/deploy
+    ansible-playbook app_deploy.yml -i hosts
+
+
+   ```
+
+
   4. Update Github to allow scm polling.
+
      Go to the [Git hub](https://github.com/reagrouptest/app-code/settings/hooks/127074657)
      -->Settings-->Webhooks--> add webhook 
      Update the settings as below-
@@ -185,14 +208,20 @@ Steps:
 
 
 
+    You might not be able to perform this step unless you have github access. This step is for information only.
+
+
   5. Push the changes to the [Application code repository](https://github.com/reagrouptest/app-code.git)
 
+    
     This will trigger the automated job build via jenkins.
 
 
     Your application is ready to serve customer.
 
     Happy coding!
+
+
 
 
 
