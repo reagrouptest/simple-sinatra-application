@@ -119,6 +119,7 @@ Steps:
 
   ```
   sudo yum update -y
+  sudo yum -y install git
   sudo yum -y install java
   sudo yum -y install python-pip
   sudo pip install ansible
@@ -150,8 +151,9 @@ Steps:
 
    The installation script directs you to the Customize Jenkins page. Go to Manage Jenkins--> Manage plugins --> Available--> install and select plugins- ssh, github, ssh agent, github integration and then restart the jenkins.
 
-   Create your first admin jenkins user.
+   Create your first admin jenkins user. 
    
+
    ##### Configure jenkins node:
 
    SSH to 'Private-jenkinsnode' from your current public Linux box and install dependencies for node to work with master.
@@ -175,14 +177,20 @@ Steps:
 
    Login to jenkins master using - http://'public ip address of linux host' and configure node as below-
 
+   Go to Manage Jenkins--> Manage nodes--> new node--> node name (aws-node)--> tick permanent agent-->ok--
+
    ![](images/jenkinsnodeconfig.JPG)
 
     set Remote home directory=/home/ec2-user
         Launch method = Launch agent agents via SSH.
         Host= jenkinsnode.reagroup.com
-        Credentials = ' update your sinatra_key.pem file content to jenkins credentials manager with the username ec2-user.'
+        Credentials = ' update your sinatra_key.pem file content to jenkins credentials manager with the username ec2-user.'  (Kind = SSH username with private key)
         Connecton timeout in seconds= 60
         Remote work directory=/home/ec2-user
+
+        Host Key Verification Strategy = Non verifying verification strategy.
+
+        Go the node--> 'node name' --> launch node. 
 
 
    ##### Configure sinatra-app job
@@ -226,7 +234,7 @@ Steps:
 
 
 
-    You will be not able to perform above step unless you have github access. This step is for information only.
+    You will be not able to perform above(webhooks) step unless you have github access. This step is for information only.
 
 
   5. Push the changes to the [Application code repository](https://github.com/reagrouptest/app-code.git)
