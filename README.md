@@ -6,6 +6,10 @@ The aim of this repository is to house sinatra application to server on port 80.
 
 This project has been designed such that it does not require system engineer support for application change deployment. Whenever a developer pushes the code to application repository, jenkins automatically build the server and your load balancer serves the updated output.
 
+# Watch the application deployment:
+
+[![Watch the deployment](images/watchdeployment.JPG)](https://drive.google.com/file/d/1qgdAEfIBvgLOu5dxWaGbqESkAdsD1D62/view)
+
 
 
 # Assignment specific links
