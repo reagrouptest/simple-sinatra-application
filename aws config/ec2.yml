@@ -231,7 +231,7 @@ Resources:
         - !GetAtt PubEc2InstanceSG.GroupId
       Tags:
         - Key:    Name
-          Value:  !Join ['-', [ Public, !Ref 'AppName']]
+          Value:  !Join ['-', [ Public, !Ref 'AppName'], 'win']
         - Key: env:code
           Value: !FindInMap [ENVIRONS, !Ref 'envCode', ABRV]
         - Key: state:scheduleName

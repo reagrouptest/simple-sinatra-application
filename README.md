@@ -1,12 +1,18 @@
 # sinatra-app
 This project is used to host sinatra app in AWS. 
+
 # Purpose
 The aim of this repository is to house sinatra application to server on port 80. It is a internet facing application which has been designed for high availability using AWS resources.
+
+This project has been designed such that it does not require system engineer support for application change deployment. Whenever a developer pushes the code to application repository, jenkins automatically build the server and your load balancer serves the updated output.
 
 
 
 # Assignment specific links
-* [Question](https://github.com/rea-cruitment/simple-sinatra-app.git)
+* [Asked assignment Question](https://github.com/rea-cruitment/simple-sinatra-app.git)
+* [Application code repository](https://github.com/reagrouptest/app-code.git)
+* [Infrastructure as code ](https://github.com/reagrouptest/simple-sinatra-application.git)
+
 
 
  
@@ -15,47 +21,60 @@ The aim of this repository is to house sinatra application to server on port 80.
 ## Prerequisite.
 * User should have AWS account.
 * User with root level privileges.
+* Tools installed on local machine- git bash, source tree, visual studio code.
+
 
 ## Assumptions
+
+A project should be designed to avoid a single point of failure. There are few known practices which can be implemented to make it more secure and highly available.
+
 * This architecture should be used only for development purpose as it serves HTTP request.
-  Recommendation is to use HTTPS for security purpose.
+  Recommendation is to use HTTPS for security reason.
 * The application is designed in single region - Australia.
 * The request is served on HTTP port using load balancer.
 * Root user is used only for test purpose. It is advised not to use root user.
 * AWS infrastructure has public subnet. You should not deploy your application in public subnet.
-* Due to limited time, the project has not been designed in best way. Documentation can also be  
-  made much better. Feel free to reach on rsrahulsingh666@gmail.com for queries.
+* Please do not store your private key on AWS server. 
+* Master branch is used for application deployment.
+* Jenkins server is designed on single host. It is recommended to create the jenkins 
+  using high availability design.
+* Always ensure traffic in flight and data at rest is always encrypted in cloud.
 
 
 
-# Design decision.
+## Steps for AWS environment creation.
 
-The application uses custom VPC instead of using default VPC. This helps to control your network security in more efficient way. 
+Please download the  [Infrastructure as code ](https://github.com/reagrouptest/simple-sinatra-application.git) git repo and follow below instruction. This repository has vpc.yml and ec2.yml files which will be used for AWS network and application infrastructure build.
 
-
-# Instruction to create project.
-
-Please download the GIT repository(as mentioned in email) and follow below instruction.
 1. Create network in AWS.
 2. Create application infrastructure in AWS.
-3. Deploy sinatra application.
 
-## Create AWS network:
+### Create AWS network:
+
 1. Login to AWS console.
  [aws login](https://aws.amazon.com/console/)
-2. Look for AWS service- cloud formation. Go to the service and select 'create stack'. To create stack you can upload the file to S3 or use your local machine to provide the file. In this case you can use your local machine to 'upload a template file' called vpc.yml which was downloaded from git repository. This will build your network in AWS.
+2. Look for AWS service- cloud formation. Go to the service and select 'create stack'. To create stack you can upload the file to S3 or use your local machine to upload the file. In this case you can use your local machine to 'upload a template file' called vpc.yml which was downloaded from git repository. This will build your network in AWS. Follow below process flow-
 Process flow-
 AWS service-->cloudformation-->create stack-->upload a template file-->choose file-->stack name
+
 3. Wait for the cloud formation to create the stack of your network. The status should change to 'Create_complete'. Once the status changes to completed. Your network is ready to build your first ec2 instance.
 
 
-## Create application infrastructure in AWS.
-1. Go to the service ec2 and create your key pairs with the name 'sinatra-key'. Once you have created the key-pair it will be downloaded to your local which you can use to login to the application server.
+### Create application infrastructure in AWS.
+
+1. Go to AWS service ec2 and create your key pairs with the name 'sinatra-key'. Once you have created the key-pair it will be downloaded to your local which you can use to login to the application server.
 Process flow-
 AWS service-->ec2-->key pairs-->create key pair.
 2. Create KMS key to encrypt the ec2 volume by following below process.
 Process flow-
 AWS service-->customer managed keys-->create alias(sinatrakmskey)-->key administrators(cloudformationrole)-->key usage permission(cloudformationrole)-->finish
+
+Once the kms key is completed. You will need to update the ec2.yml code block with kms key arn.
+
+```
+ ##Provide your kmskeyId here
+      KmsKeyId: arn:aws:kms:ap-southeast-2:929562907700:key/3b6448a4-3ec7-4bac-8ef5-57d79b3d82de
+```      
 3. Create application stack including all resources using ec2.yml file.
 Process-
 AWS service-->cloudformation-->create stack-->upload a template file(ec2.yml)-->choose file-->stack name-->mark tick to acknowledge IAM creation
@@ -63,30 +82,17 @@ AWS service-->cloudformation-->create stack-->upload a template file(ec2.yml)-->
 
 
 
-# Application deployment and automation.
-
-## Why ansible?
-1. Low overhead- due to agentless model, Ansible reduces the overheads on the network by preventing the nodes from polling the controlling machine.
-2. Secure and consistent- Ansible only uses SSH and Python on the managed nodes. This ensures safety and security. Also, Ansible ensures consistent environments.
-3. Reliable- an Ansible playbook can be idempotent when written carefully. This prevents unexpected side-effects on the managed systems.
-4. Good performance- Ansible delivers flawless performance. Though it is very easy to set up yet it is a powerful tool for deploying software applications using SSH.
-
-## Application deployment.
-
-###Assumptions.
- 1. You have git bash installed in your local machine.
-
-
-
+## Application and CI-CD environment provisioning.
 
 Steps:
 
-1. You will need to login to the public linux box and pull the GIT repo(as mentioned in the email).
-   To login- Open your git bash and login to the public server using the public ip.(You can get the public IP from AWS stack)
+1. You will need to login to the public linux box created by ec2.yml cloud formation.
+   To login- Open your git bash and login to the public server using the public ip.(You can get the public IP from AWS ec2 instance service)
+
    ```
    ssh ec2-user@ip -i sinatra_key.pem 
    ```
-   where ip=your public linux server ip and sinatra_key is the key created through aws console.
+   where ip=your public linux server ip and sinatra_key is the key created through aws console previously.
 
  2. Append your sinatra_key.pem to authorized_keys of ec2-user. This is not recommended in production servers.
     ```
@@ -95,56 +101,112 @@ Steps:
     ```
 
    
-2. Install ansible and git as below
+ 3. Install python, ansible,java and jenkins master on your current public linux instance.
+
   ```
+  sudo yum update -y
+  sudo yum install java
   sudo yum -y install python-pip
   sudo pip install ansible
-  sudo yum -y install git
+  sudo wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins.io/redhat/jenkins.repo
+  sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
+  sudo yum install jenkins -y
+  sudo service jenkins start
+
 
   ```
 
-3. Clone the git repo for application deployment.
-
-  ```
-   sudo mkdir /git
-   cd /git
-   sudo chmod 777 /git
-   sudo git clone https://github.com/reagrouptest/simple-sinatra-application.git
+   Update the Ip tables to allow jenkins master to listen on port 80.
 
    ```
+   sudo iptables -I INPUT 1 -p tcp --dport 8443 -j ACCEPT
+   sudo iptables -I INPUT 1 -p tcp --dport 8080 -j ACCEPT
+   sudo iptables -I INPUT 1 -p tcp --dport 443 -j ACCEPT
+   sudo iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT
+
+   
+   sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080
+   sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 8443
+   sudo iptables-save > /etc/sysconfig/iptables
+   
+   ```
+
+   For the first time when you use the dashboard at http://'public linxu ip':80, you will be prompted to unlock Jenkins. You can get the password from the path- /var/lib/jenkins/secrets/initialAdminPassword to unlock jenkins.
+
+   The installation script directs you to the Customize Jenkins page. Go to Manage Jenkins--> Manage plugins --> Available--> install and select plugins- ssh, github, ssh agent, github integration and then restart the jenkins.
 
 
-4. Go to the playbook path and run the ansible playbook as below.
- ```
- cd /git/simple-sinatra-application/deploy
- ansible-playbook app_deploy.yml -i hosts
+   ######Configure jenkins node:
 
- ```
-  
-You can follow above method to deploy your application. Though the preferred way of doing is through CI-CD tools like Jenkins etc.
+   Ssh to 'Private-jenkinsnode' from your current public Linux box and install dependencies for node to work with master.
 
+   ```
+   ssh ec2-user@jenkinsnode.reagroup.com -i /home/ec2-user/authorized_keys
+   sudo yum -y install java
+   sudo yum -y install python-pip
+   sudo pip install ansible
+   sudo yum -y install git
+   ```
 
+   Login to jenkins master using - http://'public ip address of linux host' and configure node as below-
 
+   ![](images/jenkinsnodeconfig.JPG)
 
-# Network design
-
-
-This document contains the information about network and it's various component. The network is designed for test purposes only and should not be used for production.
-
-Assumptions:
-
-
-* The network is designed in single region- AWS Sydney and uses most resources from AWS Sydney DC.
-* Application is standalone with no databases.
-
-
-
-# VPC
+    set Remote home directory=/home/ec2-user
+        Launch method = Launch agent agents via SSH.
+        Host= jenkinsnode.reagroup.com
+        Credentials = ' update your sinatra_key.pem file content to jenkins credentials manager with                 the user ec2-user username'
+        Connecton timeout in seconds= 60
+        Remote work directory=/home/ec2-user
 
 
-VPC is most important component of cloud based infrastructure and it is important to get it right from the first. VPC design has far-reaching implications for scaling, fault-tolerance and security. It is responsible for infrastructure flexibility and will save your important time to free up address space. It is important to lay out VPC in correct way then the careless way. VPC for this project is set up in AWS Sydney region.
+   ###### Configure sinatra-app job
 
-## Subnet
+   Go to Jenkins dashboard-->New item--->enter item name('sinatra-app), select 'freestyle project'-->
+   configure the job as below-
+    
+   ![](images/jenkinsjoba.JPG)
+
+   ![](images/jenkinsjobb.JPG)
+
+   ![](images/jenkinsjobc.JPG)
+
+   ![](images/jenkinsjobd.JPG)
+
+   ![](images/jenkinsjobe.JPG)
+
+   
+  4. Update Github to allow scm polling.
+     Go to the [Git hub](https://github.com/reagrouptest/app-code/settings/hooks/127074657)
+     -->Settings-->Webhooks--> add webhook 
+     Update the settings as below-
+
+     ![](images/githubwebhook.JPG)
+
+
+
+  5. Push the changes to the [Application code repository](https://github.com/reagrouptest/app-code.git)
+
+    This will trigger the automated job build via jenkins.
+
+
+    Your application is ready to serve customer.
+
+    Happy coding!
+
+
+
+# Design decision.
+
+## For infrastructure built in AWS.
+
+The application uses custom VPC instead of using default VPC. This helps to control your network security in more efficient way. 
+
+### VPC
+
+VPC is most important component of cloud based infrastructure and it is important to get it right from the first. VPC design has far-reaching implications for scaling, fault-tolerance and security. It is responsible for infrastructure flexibility and will save your important time to free up address space. It is important to lay out VPC in correct way than the careless way. VPC for this project is set up in AWS Sydney region.
+
+### Subnet
 
 
  Subnet layout is the key to a well-functioning VPC. Subnets determine routing, Availability Zone distribution and Network Access Control Lists. VPC is not a data center, data center network or switches. A VPC is a software defined network optimized for moving massive amount of packets into, out of and across AWS region.
@@ -157,13 +219,13 @@ VPC is most important component of cloud based infrastructure and it is importan
 In this project 2 subnets in each AZ are created to server traffic.
 
 
-## Routing
+### Routing
 
 
 It is important to apply the principle of proper and secure routing when you are exposing your servers to internet. Route tables helps to route traffic from Internet to the VPC.
 The project uses 2 route tables - Public and Private. Public route table is associated with Public subnet and private route table is associated with Private subnet. 
 
-## Fault-Tolerance
+### Fault-Tolerance
 
 
 AWS provides geographic distribution out of the box in the form of Availability Zones (AZs). Every region has at least two.
@@ -174,7 +236,7 @@ The reason you need to divide your address space evenly is so the layout of each
 In this project we have divided our subnet into similar block . The division is based on block not on number of IPs.
 
 
-## Security
+### Security
 
 
 The first layer of defense in a VPC is the routing layer.
@@ -206,9 +268,23 @@ AZ C
 ```
 
 
+# Design decision for application.
+
+The application is designed in three availability zone to provide high availability in Australia region. The traffic is served using load balancer which listens on port 80.
+
+The application uses route53 entry as hostname in ansible playbook. This setup requires less maintenance whenever the IP address of instance changes.
+
+Jenkins automatically deploy application code whenever there is update to Github application code repository.
+
+###Why ansible?
+1. Low overhead- due to agentless model, Ansible reduces the overheads on the network by preventing the nodes from polling the controlling machine.
+2. Secure and consistent- Ansible only uses SSH and Python on the managed nodes. This ensures safety and security. Also, Ansible ensures consistent environments.
+3. Reliable- an Ansible playbook can be idempotent when written carefully. This prevents unexpected side-effects on the managed systems.
+4. Good performance- Ansible delivers flawless performance. It is a powerful tool for deploying software applications using SSH.
+
+
 
 # References
 
 * [AWS whitepapers.](https://aws.amazon.com/whitepapers/)
 * [AWS best practices.](https://aws.amazon.com/whitepapers/architecting-for-the-aws-cloud-best-practices/)
-* AWS and git blogs.
