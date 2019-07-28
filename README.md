@@ -208,7 +208,7 @@ Steps:
 
 
 
-    You might not be able to perform this step unless you have github access. This step is for information only.
+    You might not be able to perform above step unless you have github access. This step is for information only.
 
 
   5. Push the changes to the [Application code repository](https://github.com/reagrouptest/app-code.git)
@@ -305,7 +305,7 @@ The application uses route53 entry as hostname in ansible playbook. This setup r
 
 Jenkins automatically deploy application code whenever there is update to Github application code repository.
 
-###Why ansible?
+### Why ansible?
 1. Low overhead- due to agentless model, Ansible reduces the overheads on the network by preventing the nodes from polling the controlling machine.
 2. Secure and consistent- Ansible only uses SSH and Python on the managed nodes. This ensures safety and security. Also, Ansible ensures consistent environments.
 3. Reliable- an Ansible playbook can be idempotent when written carefully. This prevents unexpected side-effects on the managed systems.
